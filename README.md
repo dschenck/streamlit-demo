@@ -1,5 +1,5 @@
 # About
-Demo streamlit application
+Demo [streamlit](https://streamlit.io/) application
 
 ## Demo
 A live version of the app is hosted on [render](http://render.com/) at the following [link](https://streamlit-demo-yg4s.onrender.com/). 
