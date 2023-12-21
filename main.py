@@ -1,9 +1,13 @@
 import streamlit as st
-import streamlit_highcharts as sh
 import easychart
+import easychart.rendering
 import requests
 import os
 import pandas as pd
+
+# this is to ensure the chart takes 100% of the available width
+# otherwise it will default to 600px (not responsive)
+easychart.config.rendering.responsive = True
 
 st.title("Hello world!")
 
@@ -16,7 +20,7 @@ st.markdown(
 )
 
 
-@st.cache
+@st.cache_data
 def load(year, code):
     """
     Load USDA exports data
@@ -50,15 +54,22 @@ def render(year, code):
     srs = data.groupby(pd.to_datetime(data["weekEndingDate"]))["weeklyExports"].sum()
 
     # create chart
-    chart = easychart.new("column", datetime=True)
+    chart = easychart.new("column", datetime=True, exporting=False)
     chart.title = "US exports by week"
-    chart.subtitle = (
-        "Source: US Departement of Agriculture, Foreign Agriculture Service (FAS)"
-    )
+    chart.subtitle = "Source: US Departement of Agriculture (FAS)"
     chart.plot(srs, name="Weekly exports")
 
-    # create widget
-    return sh.streamlit_highcharts(chart.serialize())
+    # render widget
+    st.components.v1.html(easychart.rendering.render(chart), height=400)
+
+    # create another chart
+    chart = easychart.new("line", datetime=True, exporting=False)
+    chart.title = "Cumulative exports by week since start of marketing year"
+    chart.subtitle = "Source: US Departement of Agriculture (FAS)"
+    chart.plot(srs.cumsum(), legend=False, marker=None, name="Cumulative exports")
+
+    st.components.v1.html(easychart.rendering.render(chart), height=400)
+    return
 
 
 columns = st.columns(2)
@@ -66,8 +77,8 @@ columns = st.columns(2)
 with columns[0]:
     year = st.selectbox(
         "Select marketing year",
-        options=[2019, 2020, 2021, 2022],
-        index=3,
+        options=[2019, 2020, 2021, 2022, 2023, 2024],
+        index=4,
         format_func=lambda option: f"MY{str(option-1)[-2:]}/{str(option)[-2:]}",
     )
 
@@ -79,4 +90,3 @@ with columns[1]:
     )
 
 render(year=year, code=code)
-

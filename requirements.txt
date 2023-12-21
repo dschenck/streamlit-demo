@@ -1,5 +1,4 @@
 streamlit
-streamlit-highcharts
 easychart
 requests
 pandas
